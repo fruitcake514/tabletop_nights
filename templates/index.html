@@ -1,0 +1,1672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tabletop Nights</title>
+<link rel="icon" href="/favicon.ico" type="image/svg+xml">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:      #0f1117;
+  --surface: #171b24;
+  --card:    #1c2130;
+  --border:  #252d3d;
+  --border2: #2e3a4e;
+  --accent:  #4f8ef7;
+  --accent2: #3a6fd4;
+  --gold:    #f0b429;
+  --green:   #2ecc71;
+  --red:     #e74c3c;
+  --text:    #e8ecf4;
+  --text2:   #8892a4;
+  --text3:   #4a5568;
+  --r:       10px;
+  --r2:      6px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.5}
+a{color:var(--accent);text-decoration:none}
+
+/* ── SPLASH ── */
+#splash{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;transition:opacity .3s}
+.splash-mark{font-family:'DM Serif Display',serif;font-size:28px;color:var(--accent)}
+
+/* ── AUTH ── */
+#auth-screen{display:none;min-height:100vh;align-items:center;justify-content:center;background:var(--bg)}
+.auth-wrap{width:100%;max-width:400px;padding:20px}
+.auth-logo{font-family:'DM Serif Display',serif;font-size:26px;color:var(--text);margin-bottom:4px}
+.auth-logo span{color:var(--accent)}
+.auth-sub{font-size:12px;color:var(--text3);margin-bottom:28px}
+.auth-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:28px}
+.auth-join{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-top:20px}
+.auth-div{display:flex;align-items:center;gap:10px;color:var(--text3);font-size:11px;margin:18px 0}
+.auth-div::before,.auth-div::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── APP ── */
+#app{display:none;min-height:100vh}
+
+/* NAV */
+.nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;gap:0;position:sticky;top:0;z-index:100;height:54px}
+.nav-logo{font-family:'DM Serif Display',serif;font-size:18px;color:var(--text);margin-right:24px;cursor:pointer;flex-shrink:0}
+.nav-logo span{color:var(--accent)}
+.nav-links{display:flex;flex:1;overflow-x:auto;scrollbar-width:none}
+.nav-links::-webkit-scrollbar{display:none}
+.nav-btn{padding:0 14px;height:54px;font-size:13px;font-weight:500;color:var(--text2);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:all .15s;white-space:nowrap;font-family:'Inter',sans-serif}
+.nav-btn:hover{color:var(--text)}
+.nav-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.nav-right{display:flex;align-items:center;gap:8px;margin-left:auto;flex-shrink:0}
+.nav-user{font-size:12px;color:var(--text2)}
+.nav-user strong{color:var(--text)}
+
+/* PARTICIPANT NAV */
+.p-nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;height:54px;display:flex;align-items:center;justify-content:space-between}
+.p-nav-logo{font-family:'DM Serif Display',serif;font-size:18px;color:var(--text)}
+.p-nav-logo span{color:var(--accent)}
+
+/* PAGES */
+.page{display:none;padding:28px 20px;max-width:1100px;margin:0 auto}
+.page.active{display:block}
+#participant-view{display:none;min-height:100vh}
+
+/* ── FORMS ── */
+.form-group{margin-bottom:14px}
+.label{display:block;font-size:11px;font-weight:600;color:var(--text2);margin-bottom:5px;letter-spacing:.04em;text-transform:uppercase}
+input,select,textarea{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:9px 12px;color:var(--text);font-size:13px;font-family:'Inter',sans-serif;transition:border .15s;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+textarea{resize:vertical;min-height:72px}
+select option{background:var(--surface)}
+input[type=range]{padding:0;height:20px;accent-color:var(--accent)}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 16px;border-radius:var(--r2);font-size:12px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;border:none;transition:all .15s;white-space:nowrap;letter-spacing:.01em}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent2)}
+.btn-secondary{background:var(--card);color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}
+.btn-ghost:hover{color:var(--text);border-color:var(--border2)}
+.btn-danger{background:var(--red);color:#fff}
+.btn-danger:hover{filter:brightness(1.15)}
+.btn-success{background:var(--green);color:#fff}
+.btn-success:hover{filter:brightness(.9)}
+.btn-sm{padding:5px 11px;font-size:11px}
+.btn-lg{padding:11px 22px;font-size:13px}
+.btn-full{width:100%;justify-content:center}
+.btn:disabled{opacity:.4;cursor:not-allowed;pointer-events:none}
+
+/* ── CARDS ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px}
+.card-sm{padding:12px}
+
+/* STAT CARDS */
+.stat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px}
+@media(max-width:900px){.stat-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:600px){.stat-grid{grid-template-columns:repeat(2,1fr)}}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+.stat-label{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px}
+.stat-val{font-family:'DM Serif Display',serif;font-size:36px;line-height:1;color:var(--text)}
+.stat-sub{font-size:11px;color:var(--text3);margin-top:4px}
+
+/* GAME CARDS */
+.game-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+.game-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:border-color .15s,transform .12s}
+.game-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.game-thumb{aspect-ratio:1;background:var(--surface);display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:32px}
+.game-thumb img{width:100%;height:100%;object-fit:cover}
+.game-info{padding:10px}
+.game-title{font-size:12px;font-weight:600;line-height:1.3;margin-bottom:4px}
+.game-meta{font-size:10px;color:var(--text3)}
+.game-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+
+/* RATING BAR — 1 to 10 */
+.rating-bar-wrap{margin-top:8px}
+.rating-bar-label{display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-bottom:3px}
+.rating-bar-track{height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.rating-bar-fill{height:100%;border-radius:2px;transition:width .3s}
+.rating-pip-row{display:flex;gap:3px;margin-top:6px}
+.rating-pip{flex:1;height:24px;border-radius:3px;background:var(--border);cursor:pointer;transition:background .12s,transform .1s;border:none;position:relative}
+.rating-pip:hover{transform:scaleY(1.3)}
+.rating-pip.lit{background:var(--gold)}
+.rating-pip.preview{background:var(--gold);opacity:.5}
+.rating-score{font-size:18px;font-weight:700;font-family:'DM Serif Display',serif;line-height:1}
+
+/* PILL / BADGES */
+.pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;letter-spacing:.03em}
+.pill-blue{background:#1e3a5f;color:#7ab8ff;border:1px solid #2a4d7a}
+.pill-green{background:#0f3d22;color:#4cd47a;border:1px solid #1a5c33}
+.pill-gold{background:#3d2e0a;color:var(--gold);border:1px solid #5c450f}
+.pill-gray{background:var(--surface);color:var(--text3);border:1px solid var(--border)}
+.pill-red{background:#3d0f0f;color:#ff8080;border:1px solid #5c1a1a}
+.pill-pulse{animation:ppulse 2s infinite}
+@keyframes ppulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+/* EVENT CARDS */
+.event-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px;cursor:pointer;transition:border-color .15s,transform .12s}
+.event-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.event-name{font-family:'DM Serif Display',serif;font-size:18px;margin-bottom:2px}
+.event-when{font-size:11px;color:var(--text2)}
+.event-thumbs{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.ev-thumb{width:38px;height:38px;border-radius:6px;background:var(--surface);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.ev-thumb img{width:100%;height:100%;object-fit:cover}
+.code-pill{font-family:'Inter',monospace;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:3px 10px;font-size:11px;font-weight:700;color:var(--text2);letter-spacing:.15em}
+
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;background:#000a;z-index:500;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto}
+.overlay.open{display:flex}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;max-width:640px;width:100%;margin:auto}
+.modal-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.modal-hdr h2{font-family:'DM Serif Display',serif;font-size:20px}
+.modal-x{background:none;border:none;color:var(--text2);font-size:18px;cursor:pointer;padding:2px 6px;border-radius:4px;line-height:1}
+.modal-x:hover{background:var(--surface)}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:9px 12px;font-size:10px;font-weight:600;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap;letter-spacing:.05em;text-transform:uppercase;background:var(--surface)}
+td{padding:10px 12px;font-size:13px;border-bottom:1px solid var(--border)40;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface)60}
+
+/* SEARCH DROPDOWN */
+.search-drop{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;max-height:320px;overflow-y:auto}
+.search-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--border)40;cursor:pointer;transition:background .1s}
+.search-item:hover{background:var(--surface)}
+.search-item:last-child{border-bottom:none}
+.search-item.sel{background:var(--surface);border-left:3px solid var(--accent)}
+.si-thumb{width:40px;height:40px;border-radius:6px;background:var(--surface);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px;overflow:hidden}
+.si-thumb img{width:100%;height:100%;object-fit:cover}
+
+/* GRID HELPERS */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:700px){.g2,.g3{grid-template-columns:1fr}}
+
+/* UTILS */
+.divider{height:1px;background:var(--border);margin:16px 0}
+.empty{text-align:center;padding:48px 20px;color:var(--text3)}
+.empty-icon{font-size:40px;margin-bottom:12px}
+.mt-4{margin-top:4px}.mt-8{margin-top:8px}.mt-12{margin-top:12px}.mt-16{margin-top:16px}.mt-20{margin-top:20px}.mt-24{margin-top:24px}
+.mb-4{margin-bottom:4px}.mb-8{margin-bottom:8px}.mb-12{margin-bottom:12px}.mb-16{margin-bottom:16px}.mb-20{margin-bottom:20px}.mb-24{margin-bottom:24px}
+.flex{display:flex}.flex-center{display:flex;align-items:center}.flex-between{display:flex;justify-content:space-between;align-items:center}
+.gap-6{gap:6px}.gap-8{gap:8px}.gap-10{gap:10px}.gap-12{gap:12px}
+.muted{color:var(--text2)}.muted2{color:var(--text3)}.accent{color:var(--accent)}.gold{color:var(--gold)}
+.bold{font-weight:600}.xs{font-size:11px}.sm{font-size:13px}
+.scroll-box{overflow-y:auto;max-height:260px;border:1px solid var(--border);border-radius:var(--r)}
+.section-hdr{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
+.section-title{font-family:'DM Serif Display',serif;font-size:19px}
+.page-title{font-family:'DM Serif Display',serif;font-size:28px;margin-bottom:4px}
+.page-sub{color:var(--text2);font-size:13px;margin-bottom:24px}
+
+/* LOADING */
+.dots{display:inline-flex;gap:4px;align-items:center;padding:4px}
+.dots span{width:5px;height:5px;border-radius:50%;background:var(--accent);animation:db .7s infinite}
+.dots span:nth-child(2){animation-delay:.12s}
+.dots span:nth-child(3){animation-delay:.24s}
+@keyframes db{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+
+/* TOAST */
+#toast-wrap{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:6px;pointer-events:none}
+.toast{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:10px 16px;font-size:13px;animation:tin .2s ease;min-width:180px}
+.toast.ok{border-color:#2ecc7160;color:var(--green)}
+.toast.err{border-color:#e74c3c60;color:#ff8080}
+@keyframes tin{from{transform:translateX(12px);opacity:0}to{transform:none;opacity:1}}
+
+/* PARTICIPANT VIEW */
+.p-wrap{max-width:480px;margin:0 auto;padding:24px 16px}
+.p-event-hdr{text-align:center;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.p-event-name{font-family:'DM Serif Display',serif;font-size:24px;margin-bottom:4px}
+.p-event-meta{font-size:12px;color:var(--text2)}
+.rsvp-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.rsvp-btn{padding:12px;border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text2);transition:all .15s;text-align:center;font-family:'Inter',sans-serif}
+.rsvp-btn:hover{border-color:var(--accent)}
+.rsvp-btn.sel-yes{background:#0f3d2220;border-color:var(--green);color:var(--green)}
+.rsvp-btn.sel-no{background:#3d0f0f20;border-color:var(--red);color:#ff8080}
+.game-rate-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start}
+.grc-thumb{width:54px;height:54px;border-radius:8px;background:var(--surface);flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:20px}
+.grc-thumb img{width:100%;height:100%;object-fit:cover}
+.grc-info{flex:1;min-width:0}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+</style>
+</head>
+<body>
+
+<div id="splash"><div class="splash-mark">🎲 Tabletop Nights</div></div>
+
+<!-- AUTH -->
+<div id="auth-screen" style="display:none;min-height:100vh">
+  <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(ellipse 70% 60% at 30% 40%,#0d1f3c 0%,transparent 70%), var(--bg)">
+    <div class="auth-wrap">
+      <div class="auth-logo">Tabletop<span>Nights</span></div>
+      <div class="auth-sub">Your game night headquarters</div>
+
+      <!-- Tab switcher -->
+      <div class="flex gap-0 mb-0" style="border-bottom:1px solid var(--border);margin-bottom:-1px">
+        <button id="tab-signin" onclick="authTab('signin')" style="padding:8px 18px;font-size:12px;font-weight:600;background:none;border:none;border-bottom:2px solid var(--accent);color:var(--accent);cursor:pointer;font-family:Inter,sans-serif">Sign In</button>
+        <button id="tab-request" onclick="authTab('request')" style="padding:8px 18px;font-size:12px;font-weight:600;background:none;border:none;border-bottom:2px solid transparent;color:var(--text3);cursor:pointer;font-family:Inter,sans-serif">Request Account</button>
+      </div>
+
+      <!-- Sign In panel -->
+      <div id="panel-signin" class="auth-card" style="border-top-left-radius:0">
+        <div class="form-group">
+          <div class="label">Username</div>
+          <input id="login-user" type="text" placeholder="username" autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()">
+        </div>
+        <div class="form-group">
+          <div class="label">Password</div>
+          <input id="login-pass" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+        </div>
+        <div id="login-err" class="xs mt-4" style="color:var(--red);margin-bottom:10px;min-height:16px"></div>
+        <button class="btn btn-primary btn-full btn-lg" onclick="doLogin()">Sign In →</button>
+      </div>
+
+      <!-- Request Account panel -->
+      <div id="panel-request" class="auth-card" style="display:none;border-top-left-radius:0">
+        <div class="xs muted2 mb-14">No account? Submit a request — the admin will approve it shortly.</div>
+        <div class="form-group">
+          <div class="label">Desired Username</div>
+          <input id="req-user" type="text" placeholder="letters, numbers, _ -" autocomplete="off" oninput="checkUsernameAvail(this.value)" onkeydown="if(event.key==='Enter')doRequestAccount()">
+          <div id="req-avail" class="xs mt-4" style="min-height:14px"></div>
+        </div>
+        <div class="form-group">
+          <div class="label">Password</div>
+          <input id="req-pass" type="password" placeholder="min 6 characters" onkeydown="if(event.key==='Enter')doRequestAccount()">
+        </div>
+        <div class="form-group">
+          <div class="label">Confirm Password</div>
+          <input id="req-pass2" type="password" placeholder="repeat password" onkeydown="if(event.key==='Enter')doRequestAccount()">
+        </div>
+        <div id="req-err" class="xs mt-4" style="color:var(--red);margin-bottom:10px;min-height:16px"></div>
+        <div id="req-ok" class="xs mt-4" style="color:var(--green);margin-bottom:10px;min-height:16px"></div>
+        <button class="btn btn-primary btn-full btn-lg" id="req-btn" onclick="doRequestAccount()">Request Account →</button>
+      </div>
+
+      <div class="auth-div">or join a game night with a code</div>
+      <div class="auth-join">
+        <div class="label">Event Code</div>
+        <div class="flex gap-8 mt-4">
+          <input id="join-code" type="text" maxlength="6" placeholder="ABC123" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')guestJoin()" style="font-size:16px;letter-spacing:.15em;font-weight:700;text-transform:uppercase">
+          <button class="btn btn-secondary" onclick="guestJoin()" style="flex-shrink:0">Join →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <nav class="nav">
+    <div class="nav-logo" onclick="showPage('dashboard')">🎲 <span>Nights</span></div>
+    <div class="nav-links">
+      <button class="nav-btn active" data-page="dashboard" onclick="showPage('dashboard')">Dashboard</button>
+      <button class="nav-btn" data-page="collection" onclick="showPage('collection')">Collection</button>
+      <button class="nav-btn" data-page="events" onclick="showPage('events')">Game Nights</button>
+      <button class="nav-btn" data-page="new-event" onclick="showPage('new-event')">+ New Night</button>
+      <button class="nav-btn" id="admin-nav-btn" data-page="admin" onclick="showPage('admin')" style="display:none">Admin</button>
+      <button class="nav-btn" id="requests-nav-btn" data-page="requests" onclick="showPage('requests')" style="display:none">Requests <span id="req-badge" style="display:none;background:var(--red);color:#fff;border-radius:10px;padding:1px 6px;font-size:10px;margin-left:4px">0</span></button>
+    </div>
+    <div class="nav-right">
+      <span class="nav-user">Hi, <strong id="nav-username"></strong></span>
+      <button class="btn btn-ghost btn-sm" onclick="openModal('m-change-pw')">⚙</button>
+      <button class="btn btn-ghost btn-sm" onclick="doLogout()">Sign Out</button>
+    </div>
+  </nav>
+
+  <!-- DASHBOARD -->
+  <div id="page-dashboard" class="page active">
+    <div class="page-title">Dashboard</div>
+    <div id="dash-user-hello" class="page-sub"></div>
+    <div id="dash-content"><div class="empty"><div class="dots"><span></span><span></span><span></span></div></div></div>
+  </div>
+
+  <!-- COLLECTION -->
+  <div id="page-collection" class="page">
+    <div class="flex-between mb-16">
+      <div><div class="page-title">My Collection</div><div class="page-sub" style="margin-bottom:0">Your personal game library</div></div>
+      <button class="btn btn-primary" onclick="openAddGame()">+ Add Game</button>
+    </div>
+    <div class="card card-sm mb-14" style="padding:10px 14px">
+      <div class="flex gap-8">
+        <input id="coll-q" placeholder="Filter by name…" oninput="renderColl()" style="flex:1">
+        <button class="btn btn-sm" id="btn-vgrid" onclick="setCollView('grid')">⊞</button>
+        <button class="btn btn-sm btn-secondary" id="btn-vlist" onclick="setCollView('list')">☰</button>
+      </div>
+    </div>
+    <div id="coll-content"></div>
+  </div>
+
+  <!-- EVENTS -->
+  <div id="page-events" class="page">
+    <div class="page-title">Game Nights</div>
+    <div class="page-sub">Upcoming and past sessions</div>
+    <div id="events-content"></div>
+  </div>
+
+  <!-- NEW EVENT -->
+  <div id="page-new-event" class="page">
+    <div class="page-title">Plan a Game Night</div>
+    <div class="page-sub">Schedule your next session and select games from your collection</div>
+    <div class="g2" style="align-items:start;gap:20px">
+      <div class="card">
+        <div class="bold mb-16">Event Details</div>
+        <div class="form-group"><div class="label">Name *</div><input id="ne-name" placeholder="Friday Night Dice"></div>
+        <div class="form-group"><div class="label">Date & Time *</div><input type="datetime-local" id="ne-date"></div>
+        <div class="form-group"><div class="label">Max Players</div><input type="number" id="ne-players" value="4" min="1" max="30" oninput="renderNEgames()"></div>
+        <div class="form-group"><div class="label">Location</div><input id="ne-loc" placeholder="John's place"></div>
+        <div class="form-group"><div class="label">Notes</div><textarea id="ne-notes" placeholder="Bring snacks!"></textarea></div>
+      </div>
+      <div>
+        <div class="card mb-12">
+          <div class="flex-between mb-10">
+            <span class="bold">Select Games</span>
+            <span class="xs muted">fits <strong id="ne-plbl" class="accent">4</strong> players</span>
+          </div>
+          <input id="ne-q" placeholder="Search collection…" oninput="renderNEgames()" class="mb-8">
+          <div id="ne-game-list" class="scroll-box"></div>
+        </div>
+        <div class="card mb-12">
+          <div class="flex-between mb-8"><span class="bold">Selected <span id="ne-sel-count" class="muted xs"></span></span></div>
+          <div id="ne-sel-games"></div>
+        </div>
+        <button class="btn btn-primary btn-full btn-lg" onclick="submitNewEvent()">Create Game Night →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div id="page-admin" class="page">
+    <div class="page-title">Admin</div>
+    <div class="page-sub">Manage user accounts</div>
+    <div class="card mb-16">
+      <div class="flex-between mb-14">
+        <span class="bold">Users</span>
+        <button class="btn btn-primary btn-sm" onclick="openModal('m-new-user')">+ New User</button>
+      </div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Username</th><th>Role</th><th>Created</th><th></th></tr></thead>
+        <tbody id="user-table-body"><tr><td colspan="4" style="text-align:center;color:var(--text3)"><div class="dots"><span></span><span></span><span></span></div></td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- REQUESTS -->
+  <div id="page-requests" class="page">
+    <div class="page-title">Account Requests</div>
+    <div class="page-sub">Review sign-up requests from new users</div>
+    <div id="requests-content"><div class="empty"><div class="dots"><span></span><span></span><span></span></div></div></div>
+  </div>
+</div>
+
+<!-- PARTICIPANT VIEW -->
+<div id="participant-view">
+  <nav class="p-nav">
+    <div class="p-nav-logo">🎲 Tabletop<span>Nights</span></div>
+    <a href="/" class="btn btn-ghost btn-sm">← Sign In</a>
+  </nav>
+  <div id="pview-content"></div>
+</div>
+
+<!-- MODAL: ADD GAME -->
+<div class="overlay" id="m-add-game">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-hdr"><h2>Add to Collection</h2><button class="modal-x" onclick="closeModal('m-add-game')">✕</button></div>
+    <div class="form-group">
+      <div class="label">Search BoardGameGeek</div>
+      <div class="flex gap-8">
+        <input id="bgg-q" placeholder="Game title…" onkeydown="if(event.key==='Enter')bggSearch()">
+        <button class="btn btn-primary" id="bgg-btn" onclick="bggSearch()" style="flex-shrink:0">Search</button>
+      </div>
+    </div>
+    <div id="bgg-results" class="mt-8"></div>
+    <div id="bgg-preview" class="card mt-10" style="display:none">
+      <div id="bgg-preview-body"></div>
+      <button class="btn btn-success btn-full mt-12" onclick="addBGGGame()">Add to My Collection ✓</button>
+    </div>
+    <div class="divider"></div>
+    <details id="manual-details">
+      <summary class="xs muted" style="cursor:pointer;font-weight:600">Add manually (no BGG needed)</summary>
+      <div class="mt-12">
+        <div class="form-group"><div class="label">Name *</div><input id="man-name" placeholder="Catan"></div>
+        <div class="g2" style="gap:10px">
+          <div class="form-group"><div class="label">Min Players</div><input id="man-minp" type="number" value="2" min="1"></div>
+          <div class="form-group"><div class="label">Max Players</div><input id="man-maxp" type="number" value="4"></div>
+        </div>
+        <div class="g2" style="gap:10px">
+          <div class="form-group"><div class="label">Play Time (min)</div><input id="man-time" type="number" value="60"></div>
+          <div class="form-group"><div class="label">Year</div><input id="man-year" type="number" placeholder="2024"></div>
+        </div>
+        <button class="btn btn-primary" onclick="addManual()">Add Game</button>
+      </div>
+    </details>
+  </div>
+</div>
+
+<!-- MODAL: GAME DETAIL -->
+<div class="overlay" id="m-game">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-hdr"><h2 id="m-game-title">—</h2><button class="modal-x" onclick="closeModal('m-game')">✕</button></div>
+    <div id="m-game-body"></div>
+  </div>
+</div>
+
+<!-- MODAL: EVENT DETAIL -->
+<div class="overlay" id="m-event">
+  <div class="modal" style="max-width:700px">
+    <div class="modal-hdr"><h2 id="m-event-title">—</h2><button class="modal-x" onclick="closeModal('m-event')">✕</button></div>
+    <div id="m-event-body"></div>
+  </div>
+</div>
+
+<!-- MODAL: NEW USER (admin) -->
+<div class="overlay" id="m-new-user">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-hdr"><h2>Create User</h2><button class="modal-x" onclick="closeModal('m-new-user')">✕</button></div>
+    <div class="form-group"><div class="label">Username</div><input id="nu-name" placeholder="username"></div>
+    <div class="form-group"><div class="label">Password</div><input id="nu-pass" type="password" placeholder="min 6 chars"></div>
+    <div class="form-group flex-center gap-8">
+      <input id="nu-admin" type="checkbox" style="width:auto">
+      <label for="nu-admin" class="label" style="margin:0;text-transform:none;letter-spacing:0">Admin account</label>
+    </div>
+    <div id="nu-err" class="xs" style="color:var(--red);margin-bottom:8px;min-height:16px"></div>
+    <button class="btn btn-primary btn-full" onclick="adminCreateUser()">Create User →</button>
+  </div>
+</div>
+
+<!-- MODAL: CHANGE PASSWORD -->
+<div class="overlay" id="m-change-pw">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-hdr"><h2>Change Password</h2><button class="modal-x" onclick="closeModal('m-change-pw')">✕</button></div>
+    <div class="form-group"><div class="label">Current Password</div><input id="cp-old" type="password" placeholder="Current password"></div>
+    <div class="form-group"><div class="label">New Password</div><input id="cp-new" type="password" placeholder="New password (min 6)"></div>
+    <div id="cp-err" class="xs" style="color:var(--red);margin-bottom:8px;min-height:16px"></div>
+    <button class="btn btn-primary btn-full" onclick="changePassword()">Update Password →</button>
+  </div>
+</div>
+
+<div id="toast-wrap"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+let TOKEN    = localStorage.getItem('ttn_tok') || '';
+let USERNAME = localStorage.getItem('ttn_usr') || '';
+let IS_ADMIN = localStorage.getItem('ttn_adm') === '1';
+let collData = [];
+let eventsData = [];
+let collView = 'grid';
+let neSelected = [];
+let bggPend = null;
+let pCode = null, pName = null, pRatings = {};
+
+// ═══════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════
+const $ = id => document.getElementById(id);
+function toast(msg, type='') {
+  const d = document.createElement('div');
+  d.className = 'toast ' + type;
+  d.textContent = msg;
+  $('toast-wrap').appendChild(d);
+  setTimeout(() => d.remove(), 3200);
+}
+async function api(path, opts={}) {
+  const headers = {'Content-Type':'application/json'};
+  if (TOKEN) headers['Authorization'] = 'Bearer ' + TOKEN;
+  const r = await fetch(path, {headers, ...opts});
+  if (r.status === 401 && path !== '/api/auth/login') { doLogout(); throw new Error('Session expired'); }
+  const body = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(body.error || r.statusText);
+  return body;
+}
+const GET  = p => api(p);
+const POST = (p,b) => api(p, {method:'POST', body:JSON.stringify(b)});
+const DEL  = p => api(p, {method:'DELETE'});
+
+function fmtDate(dt) {
+  if (!dt) return '';
+  return new Date(dt).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+function isUpcoming(dt) { return new Date(dt) > new Date(); }
+function isToday(dt) {
+  const d=new Date(dt),n=new Date();
+  return d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth()&&d.getDate()===n.getDate();
+}
+function thumbEl(url, sz=44) {
+  const br = sz > 60 ? 10 : 6;
+  if (!url) return `<span style="font-size:${Math.round(sz*.55)}px">🎲</span>`;
+  return `<img src="${url}" style="width:${sz}px;height:${sz}px;object-fit:cover;border-radius:${br}px" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🎲',style:'font-size:${Math.round(sz*.55)}px'}))">`;
+}
+
+function openModal(id)  { $(id).classList.add('open'); }
+function closeModal(id) { $(id).classList.remove('open'); }
+document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => { if(e.target===o) o.classList.remove('open'); }));
+
+// ── RATING BAR (1–10) ──────────────────────────
+function ratingColor(r) {
+  if (!r) return 'var(--border2)';
+  if (r >= 9) return '#4CAF50';
+  if (r >= 7) return '#8BC34A';
+  if (r >= 5) return 'var(--gold)';
+  if (r >= 3) return '#FF9800';
+  return '#F44336';
+}
+function ratingLabel(r) {
+  if (!r) return '—';
+  const labels = ['','Terrible','Bad','Poor','Mediocre','Ok','Good','Great','Excellent','Amazing','Perfect'];
+  return labels[Math.round(r)] || r.toFixed(1);
+}
+function ratingBarHTML(rating, maxLabel='', small=false) {
+  const r = parseFloat(rating) || 0;
+  const pct = r / 10 * 100;
+  const col = ratingColor(r);
+  const sz = small ? 14 : 18;
+  return `<div class="rating-bar-wrap">
+    <div class="rating-bar-label">
+      <span class="xs muted">${maxLabel}</span>
+      <span style="font-size:${sz}px;font-weight:700;color:${col};font-family:'DM Serif Display',serif">${r > 0 ? r.toFixed(1) : '—'}</span>
+    </div>
+    <div class="rating-bar-track"><div class="rating-bar-fill" style="width:${pct}%;background:${col}"></div></div>
+    ${!small ? `<div class="xs muted2 mt-4">${ratingLabel(r)}</div>` : ''}
+  </div>`;
+}
+function ratingPipsHTML(currentRating, onRateJs, gameId) {
+  const r = parseInt(currentRating) || 0;
+  const pips = Array.from({length:10}, (_,i) => {
+    const n = i+1;
+    const col = ratingColor(n);
+    return `<button class="rating-pip${r>=n?' lit':''}" data-n="${n}"
+      style="${r>=n?`background:${col}`:''}; height:${22+n}px"
+      onclick="${onRateJs}(${gameId?`'${gameId}',`:''} ${n})"
+      onmouseover="hoverPips(this,${n})"
+      onmouseout="resetPips(this,${r})">
+    </button>`;
+  }).join('');
+  return `<div class="rating-pip-row" id="pips-${gameId||'x'}">${pips}</div>
+          <div class="xs muted mt-4 text-center" id="pip-lbl-${gameId||'x'}">${r?ratingLabel(r)+' ('+r+'/10)':'Tap to rate'}</div>`;
+}
+function hoverPips(el, n) {
+  const row = el.closest('.rating-pip-row');
+  row.querySelectorAll('.rating-pip').forEach((p,i) => {
+    p.classList.toggle('preview', i<n);
+    if (i<n) p.style.background = ratingColor(i+1);
+    else p.style.background = p.classList.contains('lit') ? ratingColor(i+1) : '';
+  });
+}
+function resetPips(el, currentR) {
+  const row = el.closest('.rating-pip-row');
+  row.querySelectorAll('.rating-pip').forEach((p,i) => {
+    p.classList.remove('preview');
+    p.classList.toggle('lit', i < currentR);
+    p.style.background = i < currentR ? ratingColor(i+1) : '';
+  });
+}
+
+// ═══════════════════════════════════════════════
+// ADMIN REQUESTS
+// ═══════════════════════════════════════════════
+async function loadPendingCount() {
+  try {
+    const r = await GET('/api/admin/requests/pending-count');
+    const n = r.count||0;
+    const badge=$('req-badge');
+    if (badge) { badge.textContent=n; badge.style.display=n>0?'':'none'; }
+  } catch {}
+}
+async function loadRequests() {
+  const el=$('requests-content');
+  try {
+    const reqs=await GET('/api/admin/requests');
+    if (!reqs.length) {
+      el.innerHTML='<div class="empty"><div class="empty-icon">📬</div><div class="muted">No account requests yet.</div></div>';
+      return;
+    }
+    const pending=reqs.filter(r=>r.status==='pending');
+    const done=reqs.filter(r=>r.status!=='pending');
+    let html='';
+    if (pending.length) html+=`<div class="section-hdr mb-10"><span class="section-title">Pending (${pending.length})</span></div>
+      <div class="card mb-20"><div class="tbl-wrap"><table>
+        <thead><tr><th>Username</th><th>Requested</th><th></th></tr></thead>
+        <tbody>${pending.map(r=>`<tr>
+          <td><strong>${r.username}</strong></td>
+          <td class="xs muted2">${new Date(r.requested_at).toLocaleString()}</td>
+          <td><div class="flex gap-6">
+            <button class="btn btn-success btn-sm" onclick="approveRequest('${r.id}','${r.username}')">Approve ✓</button>
+            <button class="btn btn-danger btn-sm" onclick="denyRequest('${r.id}','${r.username}')">Deny ✗</button>
+          </div></td>
+        </tr>`).join('')}</tbody>
+      </table></div></div>`;
+    if (done.length) html+=`<div class="section-hdr mb-10"><span class="section-title">History</span></div>
+      <div class="card"><div class="tbl-wrap"><table>
+        <thead><tr><th>Username</th><th>Requested</th><th>Status</th></tr></thead>
+        <tbody>${done.slice(0,30).map(r=>`<tr>
+          <td><strong>${r.username}</strong></td>
+          <td class="xs muted2">${new Date(r.requested_at).toLocaleString()}</td>
+          <td>${r.status==='approved'?'<span class="pill pill-green">Approved</span>':'<span class="pill pill-red">Denied</span>'}</td>
+        </tr>`).join('')}</tbody>
+      </table></div></div>`;
+    el.innerHTML=html;
+  } catch(e) { el.innerHTML=`<div class="empty muted">${e.message}</div>`; }
+}
+async function approveRequest(rid,username) {
+  if (!confirm(`Approve account for "${username}"? They will be able to sign in immediately.`)) return;
+  try {
+    await POST(`/api/admin/requests/${rid}/approve`,{});
+    toast(`"${username}" approved — they can now sign in!`,'ok');
+    loadRequests(); loadPendingCount();
+  } catch(e) { toast(e.message,'err'); }
+}
+async function denyRequest(rid,username) {
+  if (!confirm(`Deny request from "${username}"?`)) return;
+  try {
+    await POST(`/api/admin/requests/${rid}/deny`,{});
+    toast(`Request from "${username}" denied.`,'err');
+    loadRequests(); loadPendingCount();
+  } catch(e) { toast(e.message,'err'); }
+}
+
+// ═══════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════
+async function boot() {
+  const params = new URLSearchParams(location.search);
+  const code = params.get('event') || params.get('e');
+  if (code) { showParticipantGate(code.toUpperCase()); hideSplash(); return; }
+  if (TOKEN) {
+    try { await GET('/api/auth/me'); showApp(); }
+    catch { showAuthScreen(); }
+  } else {
+    showAuthScreen();
+  }
+  hideSplash();
+}
+function hideSplash() {
+  const s = $('splash'); s.style.opacity='0'; setTimeout(()=>s.style.display='none',300);
+}
+function showAuthScreen() {
+  $('auth-screen').style.display='block'; $('app').style.display='none'; $('participant-view').style.display='none';
+}
+function showApp() {
+  $('auth-screen').style.display='none'; $('app').style.display='block'; $('participant-view').style.display='none';
+  $('nav-username').textContent = USERNAME;
+  $('dash-user-hello').textContent = 'Welcome back, ' + USERNAME;
+  if (IS_ADMIN) {
+    $('admin-nav-btn').style.display='';
+    $('requests-nav-btn').style.display='';
+    loadPendingCount();
+  }
+  loadCollectionBg();
+  showPage('dashboard');
+}
+
+// ═══════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════
+async function doLogin() {
+  const u=$('login-user').value.trim(), p=$('login-pass').value;
+  $('login-err').textContent='';
+  if (!u||!p) { $('login-err').textContent='Please fill in both fields.'; return; }
+  try {
+    const r = await POST('/api/auth/login', {username:u, password:p});
+    TOKEN=r.token; USERNAME=r.username; IS_ADMIN=r.isAdmin;
+    localStorage.setItem('ttn_tok',TOKEN); localStorage.setItem('ttn_usr',USERNAME);
+    localStorage.setItem('ttn_adm',IS_ADMIN?'1':'0');
+    showApp();
+  } catch(e) { $('login-err').textContent = e.message; }
+}
+function doLogout() {
+  TOKEN=''; USERNAME=''; IS_ADMIN=false;
+  localStorage.removeItem('ttn_tok'); localStorage.removeItem('ttn_usr'); localStorage.removeItem('ttn_adm');
+  showAuthScreen();
+}
+function authTab(tab) {
+  const s = tab==='signin';
+  $('panel-signin').style.display  = s ? '' : 'none';
+  $('panel-request').style.display = s ? 'none' : '';
+  $('tab-signin').style.borderBottomColor  = s ? 'var(--accent)' : 'transparent';
+  $('tab-request').style.borderBottomColor = s ? 'transparent' : 'var(--accent)';
+  $('tab-signin').style.color  = s ? 'var(--accent)' : 'var(--text3)';
+  $('tab-request').style.color = s ? 'var(--text3)' : 'var(--accent)';
+}
+let _availTimer = null;
+function checkUsernameAvail(val) {
+  val = (val||'').trim();
+  const el = $('req-avail'); if (!el) return;
+  if (!val) { el.textContent=''; return; }
+  el.style.color='var(--text3)'; el.textContent='Checking…';
+  clearTimeout(_availTimer);
+  _availTimer = setTimeout(async () => {
+    try {
+      const r = await fetch('/api/auth/check-username?u='+encodeURIComponent(val)).then(r=>r.json());
+      if (r.available)  { el.style.color='var(--green)'; el.textContent='✓ Available'; }
+      else if (r.taken)   { el.style.color='var(--red)';   el.textContent='✗ Username already taken'; }
+      else if (r.pending) { el.style.color='var(--red)';   el.textContent='✗ A request for this name is already pending'; }
+      else { el.style.color='var(--red)'; el.textContent='✗ Not available'; }
+    } catch { el.textContent=''; }
+  }, 450);
+}
+async function doRequestAccount() {
+  const un  = ($('req-user')?.value||'').trim();
+  const pw  = $('req-pass')?.value||'';
+  const pw2 = $('req-pass2')?.value||'';
+  $('req-err').textContent=''; $('req-ok').textContent='';
+  if (!un) { $('req-err').textContent='Enter a username.'; return; }
+  if (!/^[a-zA-Z0-9_-]+$/.test(un)) { $('req-err').textContent='Letters, numbers, _ and - only.'; return; }
+  if (un.length < 2) { $('req-err').textContent='Username must be at least 2 characters.'; return; }
+  if (pw.length < 6) { $('req-err').textContent='Password must be at least 6 characters.'; return; }
+  if (pw !== pw2)    { $('req-err').textContent='Passwords do not match.'; return; }
+  const btn = $('req-btn'); if (btn) { btn.disabled=true; btn.textContent='Submitting…'; }
+  try {
+    const res = await fetch('/api/auth/request-account',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({username:un, password:pw})
+    }).then(async r => { const b=await r.json(); if (!r.ok) throw new Error(b.error||r.statusText); return b; });
+    $('req-ok').textContent='Request submitted! The admin will review it shortly. Come back to sign in once approved.';
+    $('req-user').value=''; $('req-pass').value=''; $('req-pass2').value='';
+    const avail=$('req-avail'); if (avail) avail.textContent='';
+    if (btn) btn.textContent='Submitted ✓';
+  } catch(e) {
+    $('req-err').textContent=e.message;
+    if (btn) { btn.disabled=false; btn.textContent='Request Account →'; }
+  }
+}
+async function changePassword() {
+  const old=$('cp-old').value, nw=$('cp-new').value;
+  $('cp-err').textContent='';
+  try {
+    await POST('/api/auth/change-password', {oldPassword:old, newPassword:nw});
+    closeModal('m-change-pw'); toast('Password updated!','ok');
+    $('cp-old').value=''; $('cp-new').value='';
+  } catch(e) { $('cp-err').textContent = e.message; }
+}
+function guestJoin() {
+  const code=$('join-code').value.trim().toUpperCase();
+  if (code.length!==6) { toast('Enter a 6-character code','err'); return; }
+  showParticipantGate(code);
+}
+
+// ═══════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  $('page-'+id)?.classList.add('active');
+  document.querySelector(`[data-page="${id}"]`)?.classList.add('active');
+  if (id==='dashboard')  loadDash();
+  if (id==='collection') renderColl();
+  if (id==='events')     loadEvents();
+  if (id==='new-event')  initNE();
+  if (id==='admin')      loadAdmin();
+  if (id==='requests')   loadRequests();
+}
+
+// ═══════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════
+async function loadDash() {
+  const el=$('dash-content');
+  try {
+    const s = await GET('/api/stats');
+    let html = `<div class="stat-grid">
+      <div class="stat-card" style="border-color:var(--accent)40">
+        <div class="stat-label">Collection</div>
+        <div class="stat-val accent">${s.totalGames}</div>
+        <div class="stat-sub">games owned</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Game Nights</div>
+        <div class="stat-val">${s.totalEvents}</div>
+        <div class="stat-sub">${s.upcoming} upcoming</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Plays</div>
+        <div class="stat-val">${s.totalPlays}</div>
+        <div class="stat-sub">play count</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Rated</div>
+        <div class="stat-val">${s.rated}</div>
+        <div class="stat-sub">games rated</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Upcoming</div>
+        <div class="stat-val">${s.upcoming}</div>
+        <div class="stat-sub">nights planned</div>
+      </div>
+    </div>`;
+
+    if (s.nextUp?.length) {
+      html += `<div class="section-hdr mt-24"><span class="section-title">Upcoming Nights</span><button class="btn btn-ghost btn-sm" onclick="showPage('events')">View all →</button></div>
+        <div class="g2 mb-24">${s.nextUp.map(e=>eventCardHTML(e,true)).join('')}</div>`;
+    }
+    if (s.topGames?.length) {
+      html += `<div class="section-hdr"><span class="section-title">Most Played</span></div>
+        <div class="game-grid mb-24">${s.topGames.map(miniGameCard).join('')}</div>`;
+    }
+    if (s.unplayed?.length) {
+      html += `<div class="section-hdr"><span class="section-title">Never Played</span></div>
+        <div class="game-grid">${s.unplayed.map(miniGameCard).join('')}</div>`;
+    }
+    if (!s.totalGames) {
+      html = `<div class="empty"><div class="empty-icon">🎲</div><div class="bold mb-8">Welcome to Tabletop Nights!</div>
+        <div class="muted mb-16">Start by building your game collection.</div>
+        <button class="btn btn-primary btn-lg" onclick="showPage('collection');openAddGame()">Add Your First Game</button></div>`;
+    }
+    el.innerHTML = html;
+  } catch(e) { el.innerHTML=`<div class="empty muted">${e.message}</div>`; }
+}
+
+// ═══════════════════════════════════════════════
+// COLLECTION
+// ═══════════════════════════════════════════════
+async function loadCollectionBg() {
+  try { collData = await GET('/api/collection'); } catch {}
+}
+async function renderColl() {
+  if (!collData.length) {
+    try { collData = await GET('/api/collection'); } catch(e) { $('coll-content').innerHTML=`<div class="empty muted">${e.message}</div>`; return; }
+  }
+  const q = ($('coll-q')?.value||'').toLowerCase();
+  const filtered = collData.filter(g=>g.name.toLowerCase().includes(q));
+  const el = $('coll-content');
+  if (!filtered.length) {
+    el.innerHTML = collData.length
+      ? '<div class="empty muted2">No games match that search.</div>'
+      : '<div class="empty"><div class="empty-icon">🎲</div><div class="bold mb-8">Collection is empty</div><div class="muted mb-12">Search BoardGameGeek or add games manually.</div><button class="btn btn-primary" onclick="openAddGame()">Add a Game</button></div>';
+    return;
+  }
+  if (collView === 'grid') {
+    el.innerHTML = `<div class="game-grid">${filtered.map(gameCardHTML).join('')}</div>`;
+  } else {
+    el.innerHTML = `<div class="tbl-wrap"><table>
+      <thead><tr><th></th><th>Name</th><th>Year</th><th>Players</th><th>Time</th><th>Plays</th><th>My Rating</th><th></th></tr></thead>
+      <tbody>${filtered.map(g=>{
+        const r = parseInt(g.my_rating) || 0;
+        return `<tr>
+          <td style="padding:8px 10px"><div style="width:36px;height:36px;border-radius:6px;overflow:hidden;background:var(--surface);display:flex;align-items:center;justify-content:center">${thumbEl(g.thumbnail,36)}</div></td>
+          <td><strong>${g.name}</strong>${g.year?`<span class="xs muted2 ml-6">(${g.year})</span>`:''}</td>
+          <td class="muted2">${g.year||'—'}</td>
+          <td class="muted">${g.min_players}–${g.max_players}</td>
+          <td class="muted">${g.play_time||'?'}m</td>
+          <td><span class="bold accent">${g.play_count||0}</span></td>
+          <td>${r?`<span style="color:${ratingColor(r)};font-weight:700">${r}/10</span> <span class="xs muted2">${ratingLabel(r)}</span>`:'<span class="muted2">—</span>'}</td>
+          <td><button class="btn btn-ghost btn-sm" onclick="loadGameModal('${g.id}')">View</button></td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table></div>`;
+  }
+}
+function setCollView(v) {
+  collView=v;
+  $('btn-vgrid').className='btn btn-sm'+(v==='grid'?' btn-primary':'');
+  $('btn-vlist').className='btn btn-sm'+(v==='list'?' btn-primary':' btn-secondary');
+  renderColl();
+}
+function gameCardHTML(g) {
+  const r = parseInt(g.my_rating)||0;
+  return `<div class="game-card" onclick="loadGameModal('${g.id}')">
+    <div class="game-thumb">${thumbEl(g.thumbnail,140)}</div>
+    <div class="game-info">
+      <div class="game-title">${g.name}</div>
+      <div class="game-meta">👥 ${g.min_players}–${g.max_players} &middot; ⏱ ${g.play_time||'?'}m</div>
+      <div class="game-tags">
+        ${g.play_count?`<span class="pill pill-blue">▶ ${g.play_count} plays</span>`:''}
+        ${r?`<span class="pill pill-gold" style="color:${ratingColor(r)}">${r}/10</span>`:''}
+      </div>
+    </div>
+  </div>`;
+}
+function miniGameCard(g) {
+  const r = parseInt(g.my_rating)||0;
+  return `<div class="game-card" onclick="loadGameModal('${g.id}')">
+    <div class="game-thumb" style="aspect-ratio:1.2">${thumbEl(g.thumbnail,110)}</div>
+    <div class="game-info">
+      <div class="game-title">${g.name}</div>
+      <div class="game-tags">
+        <span class="pill pill-blue">▶ ${g.play_count}</span>
+        ${r?`<span class="pill" style="background:${ratingColor(r)}20;color:${ratingColor(r)};border:1px solid ${ratingColor(r)}40">${r}/10</span>`:''}
+      </div>
+    </div>
+  </div>`;
+}
+
+async function rateGameCollection(gid, rating) {
+  try {
+    const res = await POST(`/api/collection/${gid}/rate`, {rating});
+    const gm = collData.find(x=>x.id===gid);
+    if (gm) { gm.my_rating=rating; if(res.avg_rating) gm.avg_rating=res.avg_rating; if(res.rating_count) gm.rating_count=res.rating_count; }
+    const g = gm;  // keep reference for code below
+    // update pip row
+    const row = document.getElementById('pips-'+gid);
+    const lbl = document.getElementById('pip-lbl-'+gid);
+    if (row) {
+      row.querySelectorAll('.rating-pip').forEach((p,i) => {
+        p.classList.toggle('lit', i<rating);
+        p.style.background = i<rating ? ratingColor(i+1) : '';
+      });
+    }
+    if (lbl) lbl.textContent = ratingLabel(rating)+' ('+rating+'/10)';
+    toast(`Rated ${rating}/10 — ${ratingLabel(rating)}!`, 'ok');
+  } catch(e) { toast('Error: '+e.message, 'err'); }
+}
+
+async function loadGameModal(id) {
+  $('m-game-title').textContent='…'; $('m-game-body').innerHTML='<div class="empty"><div class="dots"><span></span><span></span><span></span></div></div>';
+  openModal('m-game');
+  try {
+    const gm = collData.find(x=>x.id===id) || await GET(`/api/collection`).then(d=>{collData=d;return d.find(x=>x.id===id);});
+    if (!gm) { $('m-game-body').innerHTML='<div class="muted">Not found.</div>'; return; }
+    $('m-game-title').textContent = gm.name;
+    const r = parseInt(gm.my_rating)||0;
+    const avg = parseFloat(gm.avg_rating)||0;
+    const rc = parseInt(gm.rating_count)||0;
+    $('m-game-body').innerHTML=`
+      <div class="flex gap-16 mb-16" style="flex-wrap:wrap">
+        <div style="width:100px;height:100px;border-radius:10px;overflow:hidden;background:var(--surface);flex-shrink:0;display:flex;align-items:center;justify-content:center">
+          ${thumbEl(gm.thumbnail,100)}</div>
+        <div style="flex:1;min-width:160px">
+          <div class="flex gap-6 flex-wrap mb-8">
+            <span class="pill pill-gray">👥 ${gm.min_players}–${gm.max_players}</span>
+            <span class="pill pill-gray">⏱ ${gm.play_time||'?'}m</span>
+            ${gm.weight?`<span class="pill pill-gray">⚖ ${parseFloat(gm.weight).toFixed(1)}/5</span>`:''}
+            ${gm.bgg_rating?`<span class="pill pill-gray">BGG ⭐ ${parseFloat(gm.bgg_rating).toFixed(1)}</span>`:''}
+          </div>
+          <span class="pill pill-blue">▶ ${gm.play_count||0} plays</span>
+          ${gm.description?`<div class="xs muted mt-8" style="line-height:1.6">${gm.description.slice(0,240)}…</div>`:''}
+        </div>
+      </div>
+      <div class="divider"></div>
+      ${avg>0?`<div class="mb-12"><div class="xs muted2 mb-4">Community Rating (${rc} rating${rc===1?'':'s'})</div><span style="color:${ratingColor(avg)};font-size:22px;font-weight:700">${avg.toFixed(1)}</span><span class="xs muted2">/10</span></div>`:''}
+      <div class="bold mb-8">My Rating</div>
+      ${ratingPipsHTML(r, 'rateGameCollection', gm.id)}
+      <div class="flex gap-8 mt-16">
+        ${gm.bgg_id?`<a href="https://boardgamegeek.com/boardgame/${gm.bgg_id}" target="_blank" class="btn btn-ghost btn-sm">View on BGG ↗</a>`:''}
+        <button class="btn btn-danger btn-sm" onclick="deleteGame('${gm.id}')">Remove</button>
+      </div>`;
+  } catch(e) { $('m-game-body').innerHTML=`<div class="muted">${e.message}</div>`; }
+}
+async function deleteGame(id) {
+  if (!confirm('Remove this game from your collection?')) return;
+  try {
+    await DEL(`/api/collection/${id}`);
+    collData = collData.filter(g=>g.id!==id);
+    closeModal('m-game'); renderColl(); toast('Game removed.','err');
+  } catch(e) { toast('Error: '+e.message,'err'); }
+}
+
+// ═══════════════════════════════════════════════
+// BGG SEARCH
+// ═══════════════════════════════════════════════
+async function bggSearch() {
+  const q=$('bgg-q').value.trim(); if (!q) return;
+  const btn=$('bgg-btn');
+  btn.disabled=true; btn.innerHTML='<div class="dots"><span></span><span></span><span></span></div>';
+  $('bgg-results').innerHTML=''; $('bgg-preview').style.display='none'; bggPend=null;
+  try {
+    const results = await GET(`/api/bgg/search?q=${encodeURIComponent(q)}`);
+    if (results.error) { showBGGErr(results.error, q); return; }
+    if (!results.length) { $('bgg-results').innerHTML='<div class="muted xs mt-8">No results found. Try adding manually below.</div>'; return; }
+    // Render results immediately with placeholder art
+    $('bgg-results').innerHTML=`<div class="search-drop mt-8" id="bgg-drop">${results.map(r=>`
+      <div class="search-item" id="si-${r.bggId}" onclick="loadBGGThing('${r.bggId}')">
+        <div class="si-thumb" id="sit-${r.bggId}">🎲</div>
+        <div style="flex:1;min-width:0">
+          <div class="bold" style="font-size:13px">${r.name}</div>
+          <div class="xs muted2">${r.year||'—'} · BGG #${r.bggId}</div>
+        </div>
+        <span class="btn btn-ghost btn-sm" style="flex-shrink:0">Select</span>
+      </div>`).join('')}</div>`;
+    // Lazy-load thumbnails in background without blocking the UI
+    loadBGGThumbs(results.map(r=>r.bggId), 'sit-');
+  } catch(e) { showBGGErr(e.message, q); }
+  btn.disabled=false; btn.textContent='Search';
+}
+
+async function loadBGGThumbs(ids, prefix='sit-') {
+  // Batch fetch thumbnails — prefix lets host ('sit-') and participant ('psit-') share this
+  if (!ids || !ids.length) return;
+  try {
+    const url = `/api/bgg/thumbs?ids=${ids.join(',')}`;
+    // Use plain fetch (no auth header) so participant view can call it too
+    const thumbs = await fetch(url).then(r=>r.json()).catch(()=>({}));
+    for (const [bid, data] of Object.entries(thumbs)) {
+      const el = document.getElementById(`${prefix}${bid}`);
+      if (el && data.thumbnail) {
+        el.innerHTML=`<img src="${data.thumbnail}" style="width:40px;height:40px;object-fit:cover;border-radius:6px" onerror="this.parentNode.innerHTML='🎲'">`;
+      }
+    }
+  } catch(e) { /* thumbnails are cosmetic — silently ignore */ }
+}
+function showBGGErr(msg, prefill='') {
+  $('bgg-results').innerHTML=`<div class="card mt-8" style="border-color:var(--red)40">
+    <div class="flex gap-10"><span style="font-size:18px">⚠️</span>
+    <div><div class="bold sm mb-4">BGG Unavailable</div><div class="xs muted">${msg}</div><div class="xs muted mt-4">Add the game manually below ↓</div></div></div></div>`;
+  $('manual-details').open=true;
+  if (prefill && $('man-name')) $('man-name').value=prefill;
+}
+async function loadBGGThing(bggId) {
+  $('bgg-preview').style.display='none'; bggPend=null;
+  // Update search results to show which is selected
+  document.querySelectorAll('#bgg-results .search-item').forEach(el => {
+    el.classList.toggle('sel', el.getAttribute('onclick')?.includes(bggId));
+  });
+  try {
+    const g = await GET(`/api/bgg/thing/${bggId}`);
+    if (g.error) { toast(g.error,'err'); $('manual-details').open=true; return; }
+    bggPend=g;
+    $('bgg-preview-body').innerHTML=`
+      <div class="flex gap-12">
+        <div style="width:70px;height:70px;border-radius:8px;overflow:hidden;background:var(--surface);flex-shrink:0;display:flex;align-items:center;justify-content:center">${thumbEl(g.thumbnail,70)}</div>
+        <div style="flex:1">
+          <div class="bold mb-4">${g.name}${g.year?` <span class="muted2">(${g.year})</span>`:''}</div>
+          <div class="flex gap-6 flex-wrap mt-4">
+            <span class="pill pill-gray">👥 ${g.minPlayers}–${g.maxPlayers}</span>
+            <span class="pill pill-gray">⏱ ${g.playTime}m</span>
+            ${g.bggRating?`<span class="pill pill-gold">BGG ${g.bggRating}</span>`:''}
+          </div>
+          ${g.description?`<div class="xs muted mt-6">${g.description.slice(0,160)}…</div>`:''}
+        </div>
+      </div>`;
+    $('bgg-preview').style.display='block';
+  } catch(e) { toast('Could not load details. Add manually.','err'); $('manual-details').open=true; }
+}
+async function addBGGGame() {
+  if (!bggPend) return;
+  if (collData.find(g=>g.bgg_id===bggPend.bggId)) { toast('Already in your collection!','err'); return; }
+  try {
+    const g = await POST('/api/collection', bggPend);
+    g.my_rating=null; collData.push(g);
+    closeModal('m-add-game'); renderColl(); toast(`"${g.name}" added! ✓`,'ok'); bggPend=null;
+  } catch(e) { toast('Error: '+e.message,'err'); }
+}
+async function addManual() {
+  const name=$('man-name').value.trim();
+  if (!name) { toast('Enter a name','err'); return; }
+  try {
+    const g = await POST('/api/collection',{name,minPlayers:parseInt($('man-minp').value)||1,maxPlayers:parseInt($('man-maxp').value)||99,playTime:parseInt($('man-time').value)||0,year:$('man-year').value||null});
+    g.my_rating=null; collData.push(g);
+    closeModal('m-add-game'); renderColl(); toast(`"${g.name}" added!`,'ok');
+  } catch(e) { toast('Error: '+e.message,'err'); }
+}
+function openAddGame() {
+  $('bgg-q').value=''; $('bgg-results').innerHTML=''; $('bgg-preview').style.display='none'; bggPend=null;
+  openModal('m-add-game');
+}
+
+// ═══════════════════════════════════════════════
+// EVENTS
+// ═══════════════════════════════════════════════
+async function loadEvents() {
+  try {
+    eventsData = await GET('/api/events');
+    renderEvents();
+  } catch(e) { $('events-content').innerHTML=`<div class="empty muted">${e.message}</div>`; }
+}
+function renderEvents() {
+  const el=$('events-content');
+  if (!eventsData.length) {
+    el.innerHTML=`<div class="empty"><div class="empty-icon">📅</div><div class="bold mb-8">No game nights yet</div><button class="btn btn-primary mt-12" onclick="showPage('new-event')">Plan a Night →</button></div>`;
+    return;
+  }
+  const up = eventsData.filter(e=>isUpcoming(e.date)).sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const pa = eventsData.filter(e=>!isUpcoming(e.date)).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  let html='';
+  if (up.length) html+=`<div class="section-hdr"><span class="section-title">Upcoming</span></div><div class="g2 mb-24">${up.map(e=>eventCardHTML(e)).join('')}</div>`;
+  if (pa.length) html+=`<div class="section-hdr"><span class="section-title">Past Nights</span></div><div class="g2">${pa.map(e=>eventCardHTML(e)).join('')}</div>`;
+  el.innerHTML=html;
+}
+function eventCardHTML(e, clickOnly=false) {
+  const thumbs=(e.games||[]).slice(0,5).map(g=>`<div class="ev-thumb">${g.thumbnail?`<img src="${g.thumbnail}" onerror="this.parentNode.innerHTML='🎲'">`:'🎲'}</div>`).join('');
+  const badge = isToday(e.date)?'<span class="pill pill-gold pill-pulse">TONIGHT</span>':isUpcoming(e.date)?'<span class="pill pill-blue">UPCOMING</span>':'<span class="pill pill-gray">PAST</span>';
+  const active = e.is_active?'<span class="pill pill-green">OPEN</span>':'<span class="pill pill-gray">CLOSED</span>';
+  return `<div class="event-card" onclick="loadEventModal('${e.id}')">
+    <div class="flex-between mb-6">
+      <div><div class="event-name">${e.name}</div><div class="event-when">${fmtDate(e.date)}${e.location?' &middot; '+e.location:''}</div></div>
+      <div class="flex gap-4" style="flex-direction:column;align-items:flex-end">${badge}${active}</div>
+    </div>
+    <div class="event-thumbs">${thumbs||'<span class="xs muted2">No games selected</span>'}</div>
+    <div class="flex-between mt-8">
+      <div class="flex gap-10 xs">
+        <span class="muted" style="color:var(--green)">✓ ${e.rsvp_yes||0} yes</span>
+        <span class="muted2">✗ ${e.rsvp_no||0} no</span>
+        <span class="muted2">● ${e.max_players} max</span>
+      </div>
+      <span class="code-pill">${e.code}</span>
+    </div>
+  </div>`;
+}
+
+async function loadEventModal(id) {
+  $('m-event-title').textContent='…'; $('m-event-body').innerHTML='<div class="empty"><div class="dots"><span></span><span></span><span></span></div></div>';
+  openModal('m-event');
+  try {
+    const e = await GET(`/api/events/${id}`);
+    $('m-event-title').textContent=e.name;
+    const shareUrl=`${location.origin}/?event=${e.code}`;
+    const badge=isToday(e.date)?'<span class="pill pill-gold">TONIGHT</span>':isUpcoming(e.date)?'<span class="pill pill-blue">UPCOMING</span>':'<span class="pill pill-gray">PAST</span>';
+    const rYes=(e.rsvps||[]).filter(r=>r.status==='yes');
+    const rNo=(e.rsvps||[]).filter(r=>r.status==='no');
+
+    const gamesHTML=(e.games||[]).map(g=>{
+      const avg=parseFloat(g.avg_rating||0);
+      return `<div class="flex gap-12 mb-10 pb-10" style="border-bottom:1px solid var(--border)40;align-items:center">
+        <div style="width:44px;height:44px;border-radius:8px;overflow:hidden;background:var(--surface);flex-shrink:0;display:flex;align-items:center;justify-content:center">${thumbEl(g.thumbnail,44)}</div>
+        <div style="flex:1"><div class="bold sm">${g.name}</div>
+          <div class="xs muted2">👥 ${g.min_players}–${g.max_players} &middot; added by ${g.added_by||'host'}</div>
+        </div>
+        <div style="text-align:right">
+          ${avg>0?`<div style="color:${ratingColor(avg)};font-weight:700;font-size:15px">${avg.toFixed(1)}/10</div><div class="xs muted2">${g.rating_count} ratings</div>`:'<div class="xs muted2">no ratings yet</div>'}
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="removeEventGame('${e.id}',${g.id})" title="Remove">✕</button>
+      </div>`;
+    }).join('')||'<div class="xs muted2">No games.</div>';
+
+    const rsvpHTML=e.rsvps?.length?`<div class="divider"></div>
+      <div class="bold mb-8 sm">RSVPs (${e.rsvps.length})</div>
+      <div class="flex gap-6" style="flex-wrap:wrap">${e.rsvps.map(r=>`
+        <div class="flex gap-6 flex-center pill ${r.status==='yes'?'pill-green':r.status==='no'?'pill-red':'pill-gray'}">
+          <strong>${r.participant}</strong> &middot; ${r.status}
+        </div>`).join('')}</div>`:''
+
+    $('m-event-body').innerHTML=`
+      <div class="flex-between mb-12">
+        <div>
+          <div class="xs muted">${fmtDate(e.date)}${e.location?' &middot; '+e.location:''}</div>
+          ${e.notes?`<div class="xs muted2 mt-4">${e.notes}</div>`:''}
+        </div>
+        <div class="flex gap-6">${badge} ${e.is_active?'<span class="pill pill-green">OPEN</span>':'<span class="pill pill-gray">CLOSED</span>'}</div>
+      </div>
+      <div class="card card-sm mb-12" style="background:var(--surface)">
+        <div class="xs muted2 mb-6 bold" style="letter-spacing:.05em;text-transform:uppercase;font-size:10px">Participant Code</div>
+        <div class="flex gap-8 flex-center flex-wrap">
+          <span class="code-pill" style="font-size:16px;letter-spacing:.2em;padding:5px 14px">${e.code}</span>
+          <button class="btn btn-ghost btn-sm" onclick="copyText('${shareUrl}')">Copy Link</button>
+          <a href="/?event=${e.code}" target="_blank" class="btn btn-ghost btn-sm">Open ↗</a>
+        </div>
+      </div>
+      <div class="bold mb-8 sm">Games</div>${gamesHTML}
+      ${rsvpHTML}
+      <div class="divider"></div>
+      <div class="flex gap-8 flex-wrap">
+        <button class="btn btn-secondary btn-sm" onclick="toggleActive('${e.id}',${e.is_active})">${e.is_active?'🔒 Close':'🔓 Reopen'} RSVPs</button>
+        ${!isUpcoming(e.date)&&!e.marked_played?`<button class="btn btn-success btn-sm" onclick="markPlayed('${e.id}')">✓ Record Plays</button>`:''}
+        ${e.marked_played?'<span class="pill pill-green">Plays Recorded</span>':''}
+        <button class="btn btn-danger btn-sm" onclick="removeEvent('${e.id}')">Delete Event</button>
+      </div>`;
+  } catch(err) { $('m-event-body').innerHTML=`<div class="muted">${err.message}</div>`; }
+}
+
+async function toggleActive(id, current) {
+  try {
+    const r = await POST(`/api/events/${id}/toggle-active`,{});
+    toast(r.is_active?'Event reopened.':'RSVPs closed.','ok');
+    await loadEvents(); closeModal('m-event');
+  } catch(e) { toast(e.message,'err'); }
+}
+async function markPlayed(id) {
+  try {
+    await POST(`/api/events/${id}/mark-played`,{});
+    toast('Play counts updated! ✓','ok');
+    collData = await GET('/api/collection');
+    closeModal('m-event'); loadEvents();
+  } catch(e) { toast(e.message,'err'); }
+}
+async function removeEvent(id) {
+  if (!confirm('Delete this game night?')) return;
+  try {
+    await DEL(`/api/events/${id}`);
+    eventsData=eventsData.filter(e=>e.id!==id);
+    closeModal('m-event'); renderEvents(); toast('Event deleted.','err');
+  } catch(e) { toast(e.message,'err'); }
+}
+async function removeEventGame(eid, egid) {
+  try {
+    await DEL(`/api/events/${eid}/games/${egid}`);
+    toast('Game removed from event.','ok');
+    await loadEventModal(eid);
+  } catch(e) { toast(e.message,'err'); }
+}
+function copyText(t) { navigator.clipboard.writeText(t).then(()=>toast('Copied!','ok')).catch(()=>toast('Copy failed','err')); }
+
+// ═══════════════════════════════════════════════
+// NEW EVENT
+// ═══════════════════════════════════════════════
+function initNE() {
+  neSelected=[];
+  const now=new Date(); now.setHours(19,0,0,0);
+  $('ne-date').value=now.toISOString().slice(0,16);
+  renderNEgames(); renderNEsel();
+}
+function renderNEgames() {
+  const maxP=parseInt($('ne-players')?.value)||4;
+  $('ne-plbl').textContent=maxP;
+  const q=($('ne-q')?.value||'').toLowerCase();
+  const eligible=collData.filter(g=>g.max_players>=maxP&&g.name.toLowerCase().includes(q));
+  const el=$('ne-game-list');
+  if (!eligible.length) { el.innerHTML=`<div style="padding:14px;text-align:center;color:var(--text3);font-size:12px">${collData.length?'No games fit this count.':'Add games to your collection first.'}</div>`; return; }
+  el.innerHTML=eligible.map(g=>`<div class="search-item${neSelected.includes(g.id)?' sel':''}" onclick="toggleNE('${g.id}')">
+    <div class="si-thumb">${g.thumbnail?`<img src="${g.thumbnail}" onerror="this.parentNode.innerHTML='🎲'">`:'🎲'}</div>
+    <div style="flex:1"><div class="bold" style="font-size:12px">${g.name}</div><div class="xs muted2">👥 ${g.min_players}–${g.max_players} &middot; ⏱ ${g.play_time}m &middot; ▶ ${g.play_count||0}</div></div>
+    <span style="color:var(--accent);font-size:16px;width:16px">${neSelected.includes(g.id)?'✓':''}</span>
+  </div>`).join('');
+}
+function toggleNE(id) {
+  neSelected=neSelected.includes(id)?neSelected.filter(x=>x!==id):[...neSelected,id];
+  renderNEgames(); renderNEsel();
+}
+function renderNEsel() {
+  $('ne-sel-count').textContent=`(${neSelected.length})`;
+  $('ne-sel-games').innerHTML=neSelected.length
+    ? neSelected.map(id=>{const g=collData.find(x=>x.id===id);return g?`<div class="flex gap-8 flex-center mb-6"><div style="width:28px;height:28px;border-radius:4px;overflow:hidden;background:var(--surface);flex-shrink:0;display:flex;align-items:center;justify-content:center">${thumbEl(g.thumbnail,28)}</div><span class="sm" style="flex:1">${g.name}</span><button class="btn btn-ghost btn-sm" onclick="toggleNE('${id}')">✕</button></div>`:''}).join('')
+    : '<div class="xs muted2">No games selected yet.</div>';
+}
+async function submitNewEvent() {
+  const name=$('ne-name').value.trim(), date=$('ne-date').value;
+  if (!name){toast('Enter a name','err');return;}
+  if (!date){toast('Pick a date','err');return;}
+  try {
+    const ev=await POST('/api/events',{name,date,maxPlayers:parseInt($('ne-players').value)||4,location:$('ne-loc').value.trim(),notes:$('ne-notes').value.trim(),games:neSelected});
+    eventsData.unshift(ev);
+    toast(`"${name}" created! Code: ${ev.code}`,'ok');
+    showPage('events');
+  } catch(e){toast('Error: '+e.message,'err');}
+}
+
+// ═══════════════════════════════════════════════
+// ADMIN
+// ═══════════════════════════════════════════════
+async function loadAdmin() {
+  try {
+    const users = await GET('/api/admin/users');
+    $('user-table-body').innerHTML=users.map(u=>`<tr>
+      <td><strong>${u.username}</strong></td>
+      <td>${u.is_admin?'<span class="pill pill-gold">Admin</span>':'<span class="pill pill-gray">User</span>'}</td>
+      <td class="xs muted2">${new Date(u.created_at).toLocaleDateString()}</td>
+      <td><div class="flex gap-6">
+        <button class="btn btn-ghost btn-sm" onclick="promptResetPw('${u.id}','${u.username}')">Reset PW</button>
+        ${!u.is_admin?`<button class="btn btn-danger btn-sm" onclick="adminDeleteUser('${u.id}','${u.username}')">Delete</button>`:''}
+      </div></td>
+    </tr>`).join('');
+  } catch(e) { toast('Admin error: '+e.message,'err'); }
+}
+async function adminCreateUser() {
+  const un=$('nu-name').value.trim(), pw=$('nu-pass').value, isAdmin=$('nu-admin').checked;
+  $('nu-err').textContent='';
+  try {
+    await POST('/api/admin/users',{username:un,password:pw,isAdmin});
+    closeModal('m-new-user'); loadAdmin(); toast(`User "${un}" created!`,'ok');
+    $('nu-name').value=''; $('nu-pass').value=''; $('nu-admin').checked=false;
+  } catch(e) { $('nu-err').textContent=e.message; }
+}
+async function adminDeleteUser(id, name) {
+  if (!confirm(`Delete user "${name}"? This will remove all their data.`)) return;
+  try {
+    await DEL(`/api/admin/users/${id}`); loadAdmin(); toast(`${name} deleted.`,'err');
+  } catch(e) { toast(e.message,'err'); }
+}
+async function promptResetPw(id, name) {
+  const pw = prompt(`New password for "${name}" (min 6 chars):`);
+  if (!pw || pw.length<6) { toast('Password too short or cancelled.','err'); return; }
+  try {
+    await POST(`/api/admin/users/${id}/reset-password`,{password:pw});
+    toast(`Password reset for ${name}.`,'ok');
+  } catch(e) { toast(e.message,'err'); }
+}
+
+// ═══════════════════════════════════════════════
+// PARTICIPANT VIEW
+// ═══════════════════════════════════════════════
+function showParticipantGate(code) {
+  $('splash').style.display='none'; $('auth-screen').style.display='none';
+  $('app').style.display='none'; $('participant-view').style.display='block';
+  pCode=code; renderNameGate(code);
+}
+async function renderNameGate(code) {
+  let ev=null;
+  try { ev = await fetch(`/api/join/${code}`).then(r=>r.json()); } catch{}
+  if (!ev || ev.error) {
+    $('pview-content').innerHTML=`<div style="display:flex;align-items:center;justify-content:center;min-height:80vh"><div class="card" style="max-width:380px;width:100%;text-align:center;padding:32px"><div style="font-size:48px;margin-bottom:16px">🤷</div><div class="bold mb-8">Event Not Found</div><div class="muted sm mb-16">No event with code <strong class="accent">${code}</strong>.</div><a href="/" class="btn btn-secondary btn-full">← Back</a></div></div>`;
+    return;
+  }
+  const thumbs=(ev.games||[]).map(g=>`<div class="ev-thumb">${g.thumbnail?`<img src="${g.thumbnail}" onerror="this.parentNode.innerHTML='🎲'">`:'🎲'}</div>`).join('');
+  $('pview-content').innerHTML=`<div style="display:flex;align-items:center;justify-content:center;min-height:80vh;padding:20px">
+    <div style="max-width:420px;width:100%">
+      <div class="p-event-hdr">
+        <div class="p-event-name">${ev.name}</div>
+        <div class="p-event-meta">${fmtDate(ev.date)}${ev.location?' &middot; '+ev.location:''}</div>
+        <div class="event-thumbs" style="justify-content:center">${thumbs}</div>
+      </div>
+      <div class="card">
+        <div class="bold mb-8">What's your name?</div>
+        <input id="pname-input" placeholder="Enter your name" autocomplete="given-name" onkeydown="if(event.key==='Enter')enterName()">
+        <button class="btn btn-primary btn-full mt-10" onclick="enterName()">Continue →</button>
+      </div>
+    </div>
+  </div>`;
+}
+async function enterName() {
+  const name=($('pname-input')?.value||'').trim();
+  if (!name) { toast('Enter your name','err'); return; }
+  pName=name;
+  try {
+    const [ev,myR]=await Promise.all([
+      fetch(`/api/join/${pCode}`).then(r=>r.json()),
+      fetch(`/api/join/${pCode}/my-ratings/${encodeURIComponent(name)}`).then(r=>r.json()),
+    ]);
+    pRatings=myR||{};
+    if (ev.error) { toast(ev.error,'err'); return; }
+    renderParticipantDash(ev);
+  } catch(e) { toast('Error loading event.','err'); }
+}
+
+function renderParticipantDash(ev) {
+  const el=$('pview-content');
+  const isClosed = !ev.is_active;
+
+  const gameCards=(ev.games||[]).map(g=>{
+    const egid=g.id;
+    const myR=parseInt(pRatings[String(egid)])||0;
+    const avg=parseFloat(g.avg_rating||0);
+    const alreadyRated = myR > 0;
+    return `<div class="game-rate-card" id="grc-${egid}">
+      <div class="grc-thumb" id="pgthumb-${egid}">${g.thumbnail?`<img src="${g.thumbnail}" onerror="this.parentNode.innerHTML='🎲'">`:'🎲'}</div>
+      <div class="grc-info">
+        <div class="bold sm">${g.name}</div>
+        <div class="xs muted2 mb-4">brought by <strong>${g.added_by||'host'}</strong>${g.is_host_pick?` <span class="pill pill-blue" style="font-size:9px">host pick</span>`:''}</div>
+        ${avg>0
+          ? `<div class="xs mb-6" style="color:${ratingColor(avg)};font-weight:600">Group: ${avg.toFixed(1)}/10 <span class="muted2 bold" style="font-weight:400">(${g.rating_count} ${g.rating_count===1?'rating':'ratings'})</span></div>`
+          : `<div class="xs muted2 mb-6">No ratings yet — be the first!</div>`}
+        ${alreadyRated
+          ? `<div class="flex-center gap-8 mb-6">
+               <span class="xs muted2">Your rating:</span>
+               <span style="color:${ratingColor(myR)};font-weight:700;font-size:15px">${myR}/10</span>
+               <span class="xs" style="color:${ratingColor(myR)}">${ratingLabel(myR)}</span>
+             </div>`
+          : ''}
+        <div class="rating-pip-row" id="pips-p-${egid}">${
+          Array.from({length:10},(_,i)=>{
+            const n=i+1;
+            return `<button class="rating-pip${myR>=n?' lit':''}" data-n="${n}"
+              style="${myR>=n?`background:${ratingColor(n)}`:''}; height:${18+n}px"
+              onclick="pRateGame(${egid},${n})"
+              onmouseover="hoverPips(this,${n})"
+              onmouseout="resetPips(this,${myR})"></button>`;
+          }).join('')
+        }</div>
+        <div class="xs muted mt-4" id="plbl-${egid}">${myR?`Tap to change · currently ${myR}/10`:'Tap to rate'}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML=`<div class="p-wrap">
+    <div class="p-event-hdr">
+      <div class="p-event-name">${ev.name}</div>
+      <div class="p-event-meta">${fmtDate(ev.date)}${ev.location?' &middot; '+ev.location:''}</div>
+      ${ev.notes?`<div class="card card-sm mt-8 sm" style="text-align:left">${ev.notes}</div>`:''}
+    </div>
+
+    ${!isClosed?`<div class="card mb-12">
+      <div class="bold mb-4">Hey ${pName}! 👋</div>
+      <div class="xs muted mb-8">Will you be at this game night?</div>
+      <div class="rsvp-row">
+        <div class="rsvp-btn" id="btn-rsvp-yes" onclick="pRsvp('yes')">✓ I'm In!</div>
+        <div class="rsvp-btn" id="btn-rsvp-no" onclick="pRsvp('no')">✗ Can't Make It</div>
+      </div>
+      <div id="rsvp-status" class="xs muted2 mt-6"></div>
+    </div>`:`<div class="card mb-12" style="border-color:var(--border)"><div class="xs muted2 flex-center gap-8"><span>🔒</span> This event is closed to new RSVPs.</div></div>`}
+
+    ${ev.games?.length
+      ? `<div class="flex-between mb-10"><span class="bold">Rate the Games</span><span class="xs muted2">${Object.keys(pRatings).length} of ${ev.games.length} rated</span></div>${gameCards}`
+      : '<div class="muted xs mb-12">No games added yet.</div>'}
+
+    ${!isClosed?`<div class="card mt-16" id="p-add-game-card">
+      <div class="bold mb-4">Bringing a game? 🎲</div>
+      <div class="xs muted2 mb-10">Search BGG or enter manually — your game will show up for everyone to rate</div>
+
+      <div class="form-group">
+        <div class="label">Search BoardGameGeek</div>
+        <div class="flex gap-8">
+          <input id="p-bgg-q" placeholder="Wingspan, Catan…" onkeydown="if(event.key==='Enter')pBGGSearch()">
+          <button class="btn btn-secondary btn-sm" id="p-bgg-btn" onclick="pBGGSearch()" style="flex-shrink:0">Search</button>
+        </div>
+      </div>
+      <div id="p-bgg-results" class="mb-8"></div>
+      <div id="p-bgg-preview" style="display:none" class="card mb-10" style="background:var(--surface)">
+        <div id="p-bgg-preview-body"></div>
+        <button class="btn btn-success btn-full mt-10" onclick="pConfirmAddGame()">Add This Game ✓</button>
+      </div>
+
+      <details id="p-manual-details">
+        <summary class="xs muted" style="cursor:pointer;font-weight:600;margin-bottom:8px">Add manually instead</summary>
+        <div class="form-group mt-8"><div class="label">Game Name *</div><input id="p-add-game-name" placeholder="Wingspan"></div>
+        <div class="g2" style="gap:8px">
+          <div class="form-group"><div class="label">Min Players</div><input id="p-add-min" type="number" value="2" min="1"></div>
+          <div class="form-group"><div class="label">Max Players</div><input id="p-add-max" type="number" value="5"></div>
+        </div>
+        <button class="btn btn-secondary btn-full" onclick="pAddGameManual()">Add Game</button>
+      </details>
+    </div>`:''}
+
+    <div class="xs muted2 mt-20 mb-8" style="text-align:center">Code: <strong class="accent">${ev.code}</strong> &middot; <a href="/" class="accent">Sign in as host →</a></div>
+  </div>`;
+
+  // Restore RSVP button state if user already RSVPed this session
+  if (pLastRsvp) {
+    const yBtn=$('btn-rsvp-yes'), nBtn=$('btn-rsvp-no'), st=$('rsvp-status');
+    if (yBtn) yBtn.className='rsvp-btn'+(pLastRsvp==='yes'?' sel-yes':'');
+    if (nBtn) nBtn.className='rsvp-btn'+(pLastRsvp==='no'?' sel-no':'');
+    if (st) st.textContent=pLastRsvp==='yes'?"You're in! See you there 🎲":"RSVP saved.";
+  }
+}
+
+// track RSVP state across re-renders
+let pLastRsvp = null;
+let pBGGPend = null;  // pending BGG game for participant add
+
+async function pRsvp(status) {
+  try {
+    await fetch(`/api/join/${pCode}/rsvp`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({participant:pName,status})});
+    pLastRsvp = status;
+    $('btn-rsvp-yes').className='rsvp-btn'+(status==='yes'?' sel-yes':'');
+    $('btn-rsvp-no').className='rsvp-btn'+(status==='no'?' sel-no':'');
+    $('rsvp-status').textContent=status==='yes'?"You're in! See you there 🎲":"RSVP saved.";
+    toast(status==='yes'?"You're in! 🎲":'RSVP updated.','ok');
+  } catch(e) { toast('Error: '+e.message,'err'); }
+}
+
+async function pBGGSearch() {
+  const q=($('p-bgg-q')?.value||'').trim(); if (!q) return;
+  const btn=$('p-bgg-btn');
+  btn.disabled=true; btn.innerHTML='<div class="dots"><span></span><span></span><span></span></div>';
+  $('p-bgg-results').innerHTML=''; $('p-bgg-preview').style.display='none'; pBGGPend=null;
+  try {
+    const r = await fetch(`/api/bgg/search?q=${encodeURIComponent(q)}`).then(r=>r.json());
+    if (r.error || !r.length) {
+      $('p-bgg-results').innerHTML='<div class="xs muted2 mt-4">No results — try adding manually below.</div>';
+      $('p-manual-details').open=true;
+      btn.disabled=false; btn.textContent='Search'; return;
+    }
+    $('p-bgg-results').innerHTML=`<div class="search-drop mt-4" style="max-height:220px;overflow-y:auto">${
+      r.map(x=>`<div class="search-item" id="psi-${x.bggId}" onclick="pLoadBGGThing('${x.bggId}','${x.name.replace(/'/g,"\\'")}')">
+        <div class="si-thumb" id="psit-${x.bggId}">🎲</div>
+        <div style="flex:1;min-width:0"><div class="bold" style="font-size:12px">${x.name}</div><div class="xs muted2">${x.year||'—'}</div></div>
+        <span class="btn btn-ghost btn-sm" style="flex-shrink:0">Pick</span>
+      </div>`).join('')
+    }</div>`;
+    // lazy load thumbnails
+    loadBGGThumbs(r.map(x=>x.bggId), 'psit-');
+  } catch(e) { $('p-bgg-results').innerHTML='<div class="xs muted2">Search failed. Try manually.</div>'; $('p-manual-details').open=true; }
+  btn.disabled=false; btn.textContent='Search';
+}
+
+async function pLoadBGGThing(bggId, fallbackName) {
+  $('p-bgg-preview').style.display='none'; pBGGPend=null;
+  document.querySelectorAll('#p-bgg-results .search-item').forEach(el=>el.classList.toggle('sel',el.id===`psi-${bggId}`));
+  try {
+    const g = await fetch(`/api/bgg/thing/${bggId}`).then(r=>r.json());
+    if (g.error) { toast('Could not load details. Add manually.','err'); $('p-manual-details').open=true; return; }
+    pBGGPend=g;
+    $('p-bgg-preview-body').innerHTML=`
+      <div class="flex gap-10">
+        <div style="width:60px;height:60px;border-radius:8px;overflow:hidden;background:var(--surface);flex-shrink:0;display:flex;align-items:center;justify-content:center">${g.thumbnail?`<img src="${g.thumbnail}" style="width:60px;height:60px;object-fit:cover">`:'🎲'}</div>
+        <div style="flex:1">
+          <div class="bold sm">${g.name}${g.year?` <span class="muted2">(${g.year})</span>`:''}</div>
+          <div class="flex gap-4 flex-wrap mt-4">
+            <span class="pill pill-gray">👥 ${g.minPlayers}–${g.maxPlayers}</span>
+            <span class="pill pill-gray">⏱ ${g.playTime}m</span>
+            ${g.bggRating?`<span class="pill pill-gold">⭐ ${g.bggRating}</span>`:''}
+          </div>
+        </div>
+      </div>`;
+    $('p-bgg-preview').style.display='block';
+  } catch(e) { toast('Error loading game.','err'); }
+}
+
+async function pConfirmAddGame() {
+  if (!pBGGPend) return;
+  await _pSubmitGame(pBGGPend.name, pBGGPend.thumbnail||'', pBGGPend.minPlayers||1, pBGGPend.maxPlayers||99, pBGGPend.playTime||0);
+}
+
+async function pAddGameManual() {
+  const name=($('p-add-game-name')?.value||'').trim();
+  if (!name) { toast('Enter a game name','err'); return; }
+  await _pSubmitGame(name, '', parseInt($('p-add-min')?.value)||1, parseInt($('p-add-max')?.value)||99, 0);
+}
+
+async function _pSubmitGame(name, thumbnail, minPlayers, maxPlayers, playTime) {
+  try {
+    const result=await fetch(`/api/join/${pCode}/add-game`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({name,thumbnail,participant:pName,minPlayers,maxPlayers,playTime})
+    }).then(r=>r.json());
+    if (result.error) { toast(result.error,'err'); return; }
+    toast(`"${name}" added to the lineup! 🎲`,'ok');
+    pBGGPend=null;
+    const [ev,myR]=await Promise.all([
+      fetch(`/api/join/${pCode}`).then(r=>r.json()),
+      fetch(`/api/join/${pCode}/my-ratings/${encodeURIComponent(pName)}`).then(r=>r.json()),
+    ]);
+    pRatings=myR||{};
+    renderParticipantDash(ev);
+  } catch(e) { toast('Error: '+e.message,'err'); }
+}
+
+async function pRateGame(egid, rating) {
+  // Optimistically update UI immediately
+  const row=document.getElementById('pips-p-'+egid);
+  const lbl=document.getElementById('plbl-'+egid);
+  if (row) {
+    row.querySelectorAll('.rating-pip').forEach((p,i)=>{
+      p.classList.toggle('lit',i<rating);
+      p.style.background=i<rating?ratingColor(i+1):'';
+    });
+  }
+  if (lbl) lbl.textContent=`Saving…`;
+
+  try {
+    const result=await fetch(`/api/join/${pCode}/rate`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({participant:pName,eventGameId:egid,rating})
+    }).then(r=>r.json());
+    if (result.error) { toast(result.error,'err'); return; }
+    pRatings[String(egid)]=rating;
+    if (lbl) lbl.textContent=`Tap to change · currently ${rating}/10`;
+    // Update the "your rating" display in the card
+    const card=document.getElementById('grc-'+egid);
+    if (card) {
+      const existing=card.querySelector('.your-rating-display');
+      const ratingDisplay=`<div class="flex-center gap-8 mb-6 your-rating-display">
+        <span class="xs muted2">Your rating:</span>
+        <span style="color:${ratingColor(rating)};font-weight:700;font-size:15px">${rating}/10</span>
+        <span class="xs" style="color:${ratingColor(rating)}">${ratingLabel(rating)}</span>
+      </div>`;
+      if (existing) existing.outerHTML=ratingDisplay;
+      else {
+        const pipRow=card.querySelector('.rating-pip-row');
+        if (pipRow) pipRow.insertAdjacentHTML('beforebegin', ratingDisplay);
+      }
+    }
+    toast(`Rated ${rating}/10 — ${ratingLabel(rating)}!`,'ok');
+  } catch(e) {
+    toast('Error: '+e.message,'err');
+    if (lbl) lbl.textContent=`Tap to rate`;
+  }
+}
+
+
+// ═══════════════════════════════════════════════
+// ADMIN REQUESTS
+// ═══════════════════════════════════════════════
+async function loadPendingCount() {
+  try {
+    const r = await GET('/api/admin/requests/pending-count');
+    const n = r.count||0;
+    const badge=$('req-badge');
+    if (badge) { badge.textContent=n; badge.style.display=n>0?'':'none'; }
+  } catch {}
+}
+async function loadRequests() {
+  const el=$('requests-content');
+  try {
+    const reqs=await GET('/api/admin/requests');
+    if (!reqs.length) {
+      el.innerHTML='<div class="empty"><div class="empty-icon">📬</div><div class="muted">No account requests yet.</div></div>';
+      return;
+    }
+    const pending=reqs.filter(r=>r.status==='pending');
+    const done=reqs.filter(r=>r.status!=='pending');
+    let html='';
+    if (pending.length) html+=`<div class="section-hdr mb-10"><span class="section-title">Pending (${pending.length})</span></div>
+      <div class="card mb-20"><div class="tbl-wrap"><table>
+        <thead><tr><th>Username</th><th>Requested</th><th></th></tr></thead>
+        <tbody>${pending.map(r=>`<tr>
+          <td><strong>${r.username}</strong></td>
+          <td class="xs muted2">${new Date(r.requested_at).toLocaleString()}</td>
+          <td><div class="flex gap-6">
+            <button class="btn btn-success btn-sm" onclick="approveRequest('${r.id}','${r.username}')">Approve ✓</button>
+            <button class="btn btn-danger btn-sm" onclick="denyRequest('${r.id}','${r.username}')">Deny ✗</button>
+          </div></td>
+        </tr>`).join('')}</tbody>
+      </table></div></div>`;
+    if (done.length) html+=`<div class="section-hdr mb-10"><span class="section-title">History</span></div>
+      <div class="card"><div class="tbl-wrap"><table>
+        <thead><tr><th>Username</th><th>Requested</th><th>Status</th></tr></thead>
+        <tbody>${done.slice(0,30).map(r=>`<tr>
+          <td><strong>${r.username}</strong></td>
+          <td class="xs muted2">${new Date(r.requested_at).toLocaleString()}</td>
+          <td>${r.status==='approved'?'<span class="pill pill-green">Approved</span>':'<span class="pill pill-red">Denied</span>'}</td>
+        </tr>`).join('')}</tbody>
+      </table></div></div>`;
+    el.innerHTML=html;
+  } catch(e) { el.innerHTML=`<div class="empty muted">${e.message}</div>`; }
+}
+async function approveRequest(rid,username) {
+  if (!confirm(`Approve account for "${username}"? They will be able to sign in immediately.`)) return;
+  try {
+    await POST(`/api/admin/requests/${rid}/approve`,{});
+    toast(`"${username}" approved — they can now sign in!`,'ok');
+    loadRequests(); loadPendingCount();
+  } catch(e) { toast(e.message,'err'); }
+}
+async function denyRequest(rid,username) {
+  if (!confirm(`Deny request from "${username}"?`)) return;
+  try {
+    await POST(`/api/admin/requests/${rid}/deny`,{});
+    toast(`Request from "${username}" denied.`,'err');
+    loadRequests(); loadPendingCount();
+  } catch(e) { toast(e.message,'err'); }
+}
+
+// ═══════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', boot);
+</script>
+</body>
+</html>

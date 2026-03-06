@@ -1,0 +1,39 @@
+# ══════════════════════════════════════════════════════════════════
+#  Synology NAS — deployment-only compose file
+#  Copy this file to your NAS. No source code needed.
+#  Update the four CHANGE_ME values below, then:
+#    docker compose -f docker-compose.nas.yml pull
+#    docker compose -f docker-compose.nas.yml up -d
+# ══════════════════════════════════════════════════════════════════
+
+services:
+  tabletop:
+    image: ghcr.io/CHANGE_ME_GITHUB_USERNAME/CHANGE_ME_REPO_NAME:latest
+    container_name: tabletop-nights
+    restart: unless-stopped
+
+    ports:
+      - "5000:5000"   # Change left 5000 to a different port if needed
+
+    volumes:
+      # Change /volume1/docker/tabletop-nights to your desired NAS path
+      # The folder will be created automatically if it doesn't exist.
+      - /volume1/docker/tabletop-nights:/data
+
+    environment:
+      # Generate a key: python3 -c "import secrets; print(secrets.token_hex(32))"
+      - SECRET_KEY=CHANGE_ME_generate_a_real_secret_key
+
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=CHANGE_ME_strong_password
+
+      - WORKERS=2
+      # Optional: ntfy.sh notifications for account requests
+      # - NTFY_URL=https://ntfy.sh/your-topic-name
+
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
